@@ -33,9 +33,9 @@ export class OtomieVisual {
     //   // by 50 to slow the animation down a bit...
     //   sprite.x = 100.0 + Math.cos(elapsed / 50.0) * 300.0;
     // });
-    // this.app.ticker.add((delta) => {
-    //   this.triangleWave.draw(delta);
-    // });
-    this.triangleWave.draw(delta);
+    this.app.ticker.add((delta) => {
+      this.triangleWave.draw(delta);
+    });
+    // this.triangleWave.draw(delta);
   }
 }
