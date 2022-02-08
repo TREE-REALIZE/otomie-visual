@@ -8,7 +8,7 @@ export class OtomieVisual {
   app;
   triangleWave;
   ripple;
-  elapsed = 0.0;
+  elapsedMS = 0.0;
   soundData = {
     volume: 0.0,
     pitch: 0.0,
@@ -19,7 +19,8 @@ export class OtomieVisual {
     colorMain: '0xdcf567',
     colorSub: '0x566550',
     objectCount: 1,
-    objectShape: 'TriangleWave'
+    objectShape: 'TriangleWave',
+    speed: 0.5
   }
 
   setup(container, width, height) {
@@ -40,8 +41,8 @@ export class OtomieVisual {
   }
 
   draw(delta) {
-    this.elapsed += delta;
-    this.triangleWave.draw(delta);
+    this.elapsedMS += this.app.ticker.deltaMS;
+    this.triangleWave.draw(this.elapsedMS);
     // this.ripple.draw(delta);
   }
 
@@ -62,15 +63,16 @@ export class OtomieVisual {
     this.calcHsv();
     this.calcObjectCount();
     this.calcObjectShape();
+    this.calcSpeed();
     this.triangleWave.update(this.drawInfo);
   }
 
   randomSoundData() {
     return {
-      volume: Math.abs(Math.cos(this.elapsed * 0.002)),
-      pitch: Math.abs(Math.sin(this.elapsed * 0.001 + 1)),
-      sharpness: Math.abs(Math.sin(this.elapsed * 0.001)),
-      roughness: Math.abs(Math.sin(this.elapsed * 0.01)),
+      volume: Math.abs(Math.cos(this.elapsedMS / 1000 * 0.2)),
+      pitch: Math.abs(Math.sin(this.elapsedMS / 1000 * 1 + 1)),
+      sharpness: Math.abs(Math.sin(this.elapsedMS / 1000 * 0.1)),
+      roughness: Math.abs(Math.sin(this.elapsedMS / 1000 * 1)),
     }
   }
 
@@ -104,6 +106,11 @@ export class OtomieVisual {
     } else {
       this.drawInfo.objectShape = 'TriangleWave';
     }
+  }
+
+  calcSpeed() {
+    const {pitch} = this.soundData;
+    this.drawInfo.speed = pitch;
   }
 
   hsvToRgb(h, s, v) {

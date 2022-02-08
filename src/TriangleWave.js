@@ -10,14 +10,20 @@ export class TriangleWave {
   double;
   triple;
   four;
-  elapsed = 0.0;
   drawInfo;
+  speedMinPerSec;
+  speedMaxPerSec;
+  currentSpeedPerSec;
+  tilePosition = 0;
+  elapsedMS = 0;
 
   setup(app, drawInfo) {
     this.app = app;
     const graphics = new PIXI.Graphics();
     this.graphics = graphics;
     const screen = this.app.screen;
+    this.speedMinPerSec = screen.width / 50;
+    this.speedMaxPerSec = screen.width / 4;
     const unitWidth = 90;
     const scale = screen.width / (unitWidth * 2 * 3.5);
     const lenA = unitWidth * scale;
@@ -73,7 +79,7 @@ export class TriangleWave {
     this.double.visible = false;
     this.triple.visible = false;
     this.four.visible = false;
-    this.single.tilePosition.set(this.elapsed, 0);
+    this.single.tilePosition.set(this.tilePosition, 0);
   }
 
   drawdouble() {
@@ -81,7 +87,7 @@ export class TriangleWave {
     this.double.visible = true;
     this.triple.visible = false;
     this.four.visible = false;
-    this.double.children.map(wave => wave.tilePosition.set(this.elapsed, 0));
+    this.double.children.map(wave => wave.tilePosition.set(this.tilePosition, 0));
   }
 
   drawtriple() {
@@ -89,7 +95,7 @@ export class TriangleWave {
     this.double.visible = false;
     this.triple.visible = true;
     this.four.visible = false;
-    this.triple.children.map(wave => wave.tilePosition.set(this.elapsed, 0));
+    this.triple.children.map(wave => wave.tilePosition.set(this.tilePosition, 0));
   }
 
   drawfour() {
@@ -97,14 +103,16 @@ export class TriangleWave {
     this.double.visible = false;
     this.triple.visible = false;
     this.four.visible = true;
-    this.four.children.map(wave => wave.tilePosition.set(this.elapsed, 0));
+    this.four.children.map(wave => wave.tilePosition.set(this.tilePosition, 0));
   }
 
   update(drawInfo) {
-    const { graphics, path, path2, app, renderTexture } = this;
-    const { colorMain, colorSub, objectShape } = drawInfo;
+    const { graphics, path, path2, app, renderTexture, speedMaxPerSec, speedMinPerSec } = this;
+    const { colorMain, colorSub, objectShape, speed } = drawInfo;
     if (objectShape !== 'TriangleWave') return;
     this.drawInfo = drawInfo;
+    this.currentSpeedPerSec = speedMinPerSec + (speedMaxPerSec - speedMinPerSec) * speed;
+    // this.currentSpeedPerSec = 200;//speedMinPerSec;
     graphics.lineStyle(0);
     graphics.beginFill(colorMain);
     graphics.drawPolygon(path);
@@ -116,10 +124,13 @@ export class TriangleWave {
     app.renderer.render(graphics, { renderTexture, clear: true });
   }
 
-  draw(delta) {
-    this.elapsed += delta;
+  draw(elapsedMS) {
+    const deltaMS = elapsedMS - this.elapsedMS;
+    this.elapsedMS = elapsedMS;
+    this.tilePosition += deltaMS * 0.001 * this.currentSpeedPerSec;
     // this.drawfour();
     // return;
+    
     const { objectCount, objectShape } = this.drawInfo;
     if (objectShape !== 'TriangleWave') {
       this.single.visible = false;
