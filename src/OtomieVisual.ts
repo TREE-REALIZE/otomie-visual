@@ -1,13 +1,14 @@
 import * as PIXI from 'pixi.js';
-import { Ripple } from './Ripple';
-import { TriangleWave } from './TriangleWave';
+import { Maru } from './Maru';
+import { GizaGiza } from './GizaGiza';
+import { DrawInfo } from './type';
 
 PIXI.utils.skipHello();
 
 export class OtomieVisual {
-  app;
-  triangleWave;
-  ripple;
+  app: PIXI.Application;
+  gizaGiza: GizaGiza;
+  maru: Maru;
   elapsedMS = 0.0;
   soundData = {
     volume: 0.0,
@@ -15,15 +16,15 @@ export class OtomieVisual {
     sharpness: 0.0,
     roughness: 0.0,
   };
-  drawInfo = {
-    colorMain: '0xdcf567',
-    colorSub: '0x566550',
+  drawInfo: DrawInfo = {
+    colorMain: 0xdcf567,
+    colorSub: 0x566550,
     objectCount: 1,
-    objectShape: 'TriangleWave',
-    speed: 0.5
-  }
+    objectShape: 'GizaGiza',
+    speed: 0.5,
+  };
 
-  setup(container, width, height) {
+  setup(container: HTMLDivElement, width: number, height: number) {
     const app = new PIXI.Application({
       width,
       height,
@@ -32,18 +33,18 @@ export class OtomieVisual {
     });
     this.app = app;
     container.appendChild(app.view);
-    this.triangleWave = new TriangleWave();
-    this.triangleWave.setup(app, this.drawInfo);
-    this.ripple = new Ripple();
-    // this.ripple.setup(app);
+    this.gizaGiza = new GizaGiza();
+    this.gizaGiza.setup(app, this.drawInfo);
+    this.maru = new Maru();
+    this.maru.setup(app, this.drawInfo);
     this.app.ticker.add(this.draw.bind(this));
     this.app.ticker.stop();
   }
 
-  draw(delta) {
+  draw() {
     this.elapsedMS += this.app.ticker.deltaMS;
-    this.triangleWave.draw(this.elapsedMS);
-    // this.ripple.draw(delta);
+    this.gizaGiza.draw();
+    this.maru.draw();
   }
 
   play() {
@@ -58,22 +59,23 @@ export class OtomieVisual {
     this.app.ticker.stop();
   }
 
-  updateSoundData(soundData) {
+  updateSoundData(soundData: OtomieVisual['soundData']) {
     this.soundData = soundData;
     this.calcHsv();
     this.calcObjectCount();
     this.calcObjectShape();
     this.calcSpeed();
-    this.triangleWave.update(this.drawInfo);
+    this.gizaGiza.update(this.drawInfo);
+    this.maru.update(this.drawInfo);
   }
 
   randomSoundData() {
     return {
-      volume: Math.abs(Math.cos(this.elapsedMS / 1000 * 0.2)),
-      pitch: Math.abs(Math.sin(this.elapsedMS / 1000 * 1 + 1)),
-      sharpness: Math.abs(Math.sin(this.elapsedMS / 1000 * 0.1)),
-      roughness: Math.abs(Math.sin(this.elapsedMS / 1000 * 1)),
-    }
+      volume: Math.abs(Math.cos((this.elapsedMS / 1000) * 0.2)),
+      pitch: Math.abs(Math.sin((this.elapsedMS / 1000) * 1 + 1)),
+      sharpness: Math.abs(Math.sin((this.elapsedMS / 1000) * 0.1)),
+      roughness: Math.abs(Math.sin((this.elapsedMS / 1000) * 1)),
+    };
   }
 
   calcHsv() {
@@ -92,28 +94,30 @@ export class OtomieVisual {
   }
 
   calcObjectShape() {
-    const {sharpness} = this.soundData;
+    const { sharpness } = this.soundData;
+    // this.drawInfo.objectShape = 'Maru';
+    // return;
     if (sharpness < 0.1666667) {
-      this.drawInfo.objectShape = 'TriangleWave';
+      this.drawInfo.objectShape = 'GizaGiza';
     } else if (sharpness < 0.3333334) {
-      this.drawInfo.objectShape = 'TriangleWave';
+      this.drawInfo.objectShape = 'Maru';
     } else if (sharpness < 0.5) {
-      this.drawInfo.objectShape = 'TriangleWave';
+      this.drawInfo.objectShape = 'GizaGiza';
     } else if (sharpness < 0.6666667) {
-      this.drawInfo.objectShape = 'TriangleWave';
+      this.drawInfo.objectShape = 'Maru';
     } else if (sharpness < 0.8333334) {
-      this.drawInfo.objectShape = 'TriangleWave';
+      this.drawInfo.objectShape = 'GizaGiza';
     } else {
-      this.drawInfo.objectShape = 'TriangleWave';
+      this.drawInfo.objectShape = 'Maru';
     }
   }
 
   calcSpeed() {
-    const {pitch} = this.soundData;
+    const { pitch } = this.soundData;
     this.drawInfo.speed = pitch;
   }
 
-  hsvToRgb(h, s, v) {
+  hsvToRgb(h: number, s: number, v: number) {
     const hlimit = 360;
     const slimit = 1;
     const vlimit = 1;
@@ -138,22 +142,35 @@ export class OtomieVisual {
 
     switch (i) {
       case 0:
-        r = v_; g = t; b = p;
+        r = v_;
+        g = t;
+        b = p;
         break;
       case 1:
-        r = q; g = v_; b = p;
+        r = q;
+        g = v_;
+        b = p;
         break;
       case 2:
-        r = p; g = v_; b = t;
+        r = p;
+        g = v_;
+        b = t;
         break;
       case 3:
-        r = p; g = q; b = v_;
+        r = p;
+        g = q;
+        b = v_;
         break;
       case 4:
-        r = t; g = p; b = v_;
+        r = t;
+        g = p;
+        b = v_;
         break;
-      default: // case 5:
-        r = v_; g = p; b = q;
+      default:
+        // case 5:
+        r = v_;
+        g = p;
+        b = q;
         break;
     }
     return [r, g, b];
