@@ -1,6 +1,7 @@
 import * as PIXI from 'pixi.js';
 import { Maru } from './Maru';
 import { GizaGiza } from './GizaGiza';
+import { Nami } from './Nami';
 import { DrawInfo } from './type';
 
 PIXI.utils.skipHello();
@@ -9,6 +10,7 @@ export class OtomieVisual {
   app: PIXI.Application;
   gizaGiza: GizaGiza;
   maru: Maru;
+  nami: Nami;
   elapsedMS = 0.0;
   soundData = {
     volume: 0.0,
@@ -37,6 +39,8 @@ export class OtomieVisual {
     this.gizaGiza.setup(app, this.drawInfo);
     this.maru = new Maru();
     this.maru.setup(app, this.drawInfo);
+    this.nami = new Nami();
+    this.nami.setup(app, this.drawInfo);
     this.app.ticker.add(this.draw.bind(this));
     this.app.ticker.stop();
   }
@@ -45,6 +49,7 @@ export class OtomieVisual {
     this.elapsedMS += this.app.ticker.deltaMS;
     this.gizaGiza.draw();
     this.maru.draw();
+    this.nami.draw();
   }
 
   play() {
@@ -65,8 +70,19 @@ export class OtomieVisual {
     this.calcObjectCount();
     this.calcObjectShape();
     this.calcSpeed();
-    this.gizaGiza.update(this.drawInfo);
-    this.maru.update(this.drawInfo);
+    switch (this.drawInfo.objectShape) {
+      case 'GizaGiza':
+        this.gizaGiza.update(this.drawInfo);
+        break;
+      case 'Maru':
+        this.maru.update(this.drawInfo);
+        break;
+      case 'Nami':
+        this.nami.update(this.drawInfo);
+        break;
+      default:
+        break;
+    }
   }
 
   randomSoundData() {
@@ -95,20 +111,20 @@ export class OtomieVisual {
 
   calcObjectShape() {
     const { sharpness } = this.soundData;
-    // this.drawInfo.objectShape = 'Maru';
+    // this.drawInfo.objectShape = 'Nami';
     // return;
     if (sharpness < 0.1666667) {
       this.drawInfo.objectShape = 'GizaGiza';
     } else if (sharpness < 0.3333334) {
       this.drawInfo.objectShape = 'Maru';
     } else if (sharpness < 0.5) {
-      this.drawInfo.objectShape = 'GizaGiza';
+      this.drawInfo.objectShape = 'Nami';
     } else if (sharpness < 0.6666667) {
-      this.drawInfo.objectShape = 'Maru';
-    } else if (sharpness < 0.8333334) {
       this.drawInfo.objectShape = 'GizaGiza';
-    } else {
+    } else if (sharpness < 0.8333334) {
       this.drawInfo.objectShape = 'Maru';
+    } else {
+      this.drawInfo.objectShape = 'Nami';
     }
   }
 
