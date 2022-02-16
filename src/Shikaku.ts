@@ -1,14 +1,12 @@
 import * as PIXI from 'pixi.js';
 import { DrawInfo } from './type';
 
-export class Sankaku {
+export class Shikaku {
   app: PIXI.Application;
   graphics: PIXI.Graphics;
   renderTexture: PIXI.RenderTexture;
-  lenA: number = 220 * 1.5;  // 底辺
-  lenB: number = 180 * 1.5  // 高さ;
-  lenC: number = 110 * 1.5  // 小さい三角形の高さ;
-  scales = [1, 0.75, 0.7, 0.6]
+  lenA: number = 100;  // 正方形の一辺の長さ
+  scales: number[];
   single: PIXI.Sprite;
   double: PIXI.Container;
   triple: PIXI.Container;
@@ -18,35 +16,34 @@ export class Sankaku {
   speedMaxPerSec: number;
   currentSpeedPerSec: number;
   moveRate: number = 1;
-  moveDirection: number = 1;
 
   setup(app: PIXI.Application, drawInfo: DrawInfo) {
-    const { lenA, lenB, lenC, scales } = this;
+    const { lenA } = this;
     this.app = app;
+    const screen = this.app.screen;
+    const scales = [0.85, 0.45, 0.3, 0.3].map(each => screen.width / lenA * each);
+    this.scales = scales;
     const graphics = new PIXI.Graphics();
     this.graphics = graphics;
     this.config();
     const renderTexture = PIXI.RenderTexture.create({
       width: lenA,
-      height: lenB,
+      height: lenA,
       resolution: devicePixelRatio,
     });
     this.renderTexture = renderTexture;
     this.update(drawInfo);
-    const screen = this.app.screen;
     this.single = new PIXI.Sprite(renderTexture);
-    this.single.anchor.set(0.5, 0);
-    this.single.x = screen.width * 0.5;
-    this.single.y = 0;
+    this.single.anchor.set(0.5, 0.5);
+    this.single.scale.set(scales[0]);
     this.single.visible = false;
     this.app.stage.addChild(this.single);
 
     this.double = new PIXI.Container();
     for (let i = 0; i < 2; i++) {
       const sprite = new PIXI.Sprite(renderTexture);
-      sprite.anchor.set(0.5, 0);
+      sprite.anchor.set(0.5, 0.5);
       sprite.scale.set(scales[1]);
-      sprite.rotation = Math.PI * i;
       this.double.addChild(sprite);
     }
     this.double.x = screen.width * 0.5;
@@ -57,9 +54,8 @@ export class Sankaku {
     this.triple = new PIXI.Container();
     for (let i = 0; i < 3; i++) {
       const sprite = new PIXI.Sprite(renderTexture);
-      sprite.anchor.set(0.5, 0);
+      sprite.anchor.set(0.5, 0.5);
       sprite.scale.set(scales[2]);
-      sprite.rotation = Math.PI + (Math.PI * 2 / 3) * i;
       this.triple.addChild(sprite);
     }
     this.triple.x = screen.width * 0.5;
@@ -70,9 +66,8 @@ export class Sankaku {
     this.four = new PIXI.Container();
     for (let i = 0; i < 4; i++) {
       const sprite = new PIXI.Sprite(renderTexture);
-      sprite.anchor.set(0.5, 0);
+      sprite.anchor.set(0.5, 0.5);
       sprite.scale.set(scales[3]);
-      sprite.rotation = Math.PI + Math.PI / 2 * i;
       this.four.addChild(sprite);
     }
     this.four.x = screen.width * 0.5;
@@ -82,16 +77,16 @@ export class Sankaku {
   }
 
   render() {
-    const { graphics, lenA, lenB, lenC, app, renderTexture } = this;
+    const { graphics, lenA, app, renderTexture } = this;
     const { colorMain, colorSub } = this.drawInfo;
-    const rate = lenC / lenB;
+    const rate = 0.7;
     graphics.lineStyle(0);
     graphics.beginFill(colorSub);
-    graphics.drawPolygon([0, 0, lenA, 0, lenA * 0.5, lenB]);
+    graphics.drawRect(0, 0, lenA, lenA);
     graphics.endFill();
     graphics.lineStyle(0);
     graphics.beginFill(colorMain);
-    graphics.drawPolygon([lenA * (1 - rate) * 0.5, lenB - lenC, lenA - lenA * (1 - rate) * 0.5, lenB - lenC, lenA * 0.5, lenB]);
+    graphics.drawRect(lenA * (1 - rate) / 2, lenA * (1 - rate) / 2, lenA * rate, lenA * rate);
     graphics.endFill();
     app.renderer.render(graphics, { renderTexture, clear: true });
   }
@@ -110,22 +105,16 @@ export class Sankaku {
   }
 
   draw() {
-    this.moveRate = Math.max(
-      0,
-      Math.min(1, this.moveRate + this.moveDirection * this.app.ticker.deltaMS * 0.001 * this.currentSpeedPerSec),
-    );
-    if (this.moveRate === 1) this.moveDirection = -1;
-    if (this.moveRate === 0) this.moveDirection = 1;
+    this.moveRate = (this.moveRate + this.app.ticker.deltaMS * 0.001 * this.currentSpeedPerSec) % 1;
 
     const { objectCount, objectShape } = this.drawInfo;
-    if (objectShape !== 'Sankaku') {
+    if (objectShape !== 'Shikaku') {
       this.single.visible = false;
       this.double.visible = false;
       this.triple.visible = false;
       this.four.visible = false;
       return;
     }
-
     // this.drawFour();
     // return;
 
@@ -148,49 +137,55 @@ export class Sankaku {
   }
 
   drawSingle() {
-    const { app, lenB, moveRate, scales } = this;
+    const { app, moveRate, scales, lenA } = this;
     this.single.visible = true;
     this.double.visible = false;
     this.triple.visible = false;
     this.four.visible = false;
-    this.single.y = (app.screen.height - lenB * scales[0]) * moveRate;
+    this.single.x = app.screen.width / 2;
+    this.single.y = (app.screen.height + lenA * scales[0] / 2) - (app.screen.height + lenA * scales[0]) * moveRate;
   }
 
   drawDouble() {
-    const { app, lenB, moveRate, scales } = this;
+    const { app, lenA, moveRate, scales } = this;
     this.single.visible = false;
     this.double.visible = true;
     this.triple.visible = false;
     this.four.visible = false;
     this.double.children.map((each, i) => {
       const dir = i % 2 === 0 ? 1 : -1;
-      each.y = (app.screen.height * 0.5 * Math.sin(Math.PI * i - Math.PI * 0.5)) + (app.screen.height * 0.5 - lenB * scales[1]) * moveRate * dir;
+      each.x = (-1 * dir * lenA * scales[1]) / 2;
+      each.y = (dir * lenA * scales[1]) / 2 - 1 * dir * (app.screen.height / 2 + lenA * scales[1]) * moveRate;
     })
   }
 
   drawTriple() {
-    const { app, lenA, lenB, moveRate, scales } = this;
+    const { app, lenA, moveRate, scales } = this;
     this.single.visible = false;
     this.double.visible = false;
     this.triple.visible = true;
     this.four.visible = false;
-    const radius = lenA * scales[2] * 0.5 / Math.sqrt(3);
     this.triple.children.map((each, i) => {
-      each.x = (radius + (app.screen.height / 2 - radius - lenB * scales[2]) * moveRate) * Math.cos(-0.5 * Math.PI + Math.PI * 2 / 3 * i);
-      each.y = (radius + (app.screen.height / 2 - radius - lenB * scales[2]) * moveRate) * Math.sin(-0.5 * Math.PI + Math.PI * 2 / 3 * i);
+      const dir = i % 2 === 0 ? 1 : -1;
+      each.x = -1 * lenA * scales[2] + i * lenA * scales[2];
+      each.y = (-1 * dir * lenA * scales[2] / 2) + dir * (app.screen.height / 2 + lenA * scales[2]) * moveRate;
     })
   }
 
   drawFour() {
-    const { app, lenA, lenB, moveRate, scales } = this;
+    const { app, lenA, moveRate, scales } = this;
     this.single.visible = false;
     this.double.visible = false;
     this.triple.visible = false;
     this.four.visible = true;
-    const radius = app.screen.height / 2;
+    const radius = lenA * scales[3];
     this.four.children.map((each, i) => {
-      each.x = (radius + (app.screen.height / 2 - radius - lenB * scales[3]) * moveRate) * Math.cos(0.5 * Math.PI + Math.PI / 2 * i);
-      each.y = (radius + (app.screen.height / 2 - radius - lenB * scales[3]) * moveRate) * Math.sin(0.5 * Math.PI + Math.PI / 2 * i);
+      const dir = i < 2 ? 1 : -1;
+      const axisX = i % 2 === 0 ? 1 : 0;
+      const axisY = i % 2 === 0 ? 0 : 1;
+      const radian = Math.PI / 2 * (i - 1);
+      each.x = Math.cos(radian) * radius + axisX * dir * ((app.screen.width / 2 + lenA * scales[3] / 2) * moveRate);
+      each.y = Math.sin(radian) * radius + axisY * dir * ((app.screen.width / 2 + lenA * scales[3] / 2) * moveRate);;
     })
   }
 }

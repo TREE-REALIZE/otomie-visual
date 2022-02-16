@@ -3,6 +3,7 @@ import { Maru } from './Maru';
 import { GizaGiza } from './GizaGiza';
 import { Nami } from './Nami';
 import { Sankaku } from './Sankaku';
+import { Shikaku } from './Shikaku';
 import { DrawInfo } from './type';
 
 PIXI.utils.skipHello();
@@ -13,6 +14,7 @@ export class OtomieVisual {
   maru: Maru;
   nami: Nami;
   sankaku: Sankaku;
+  shikaku: Shikaku;
   elapsedMS = 0.0;
   soundData = {
     volume: 0.0,
@@ -45,6 +47,8 @@ export class OtomieVisual {
     this.nami.setup(app, this.drawInfo);
     this.sankaku = new Sankaku();
     this.sankaku.setup(app, this.drawInfo);
+    this.shikaku = new Shikaku();
+    this.shikaku.setup(app, this.drawInfo);
     this.app.ticker.add(this.draw.bind(this));
     this.app.ticker.stop();
   }
@@ -55,6 +59,7 @@ export class OtomieVisual {
     this.maru.draw();
     this.nami.draw();
     this.sankaku.draw();
+    this.shikaku.draw();
   }
 
   play() {
@@ -88,6 +93,9 @@ export class OtomieVisual {
       case 'Sankaku':
         this.sankaku.update(this.drawInfo);
         break;
+      case 'Shikaku':
+        this.shikaku.update(this.drawInfo);
+        break;
       default:
         break;
     }
@@ -119,7 +127,7 @@ export class OtomieVisual {
 
   calcObjectShape() {
     const { sharpness } = this.soundData;
-    // this.drawInfo.objectShape = 'Sankaku';
+    // this.drawInfo.objectShape = 'Shikaku';
     // return;
     if (sharpness < 0.1666667) {
       this.drawInfo.objectShape = 'GizaGiza';
@@ -130,7 +138,7 @@ export class OtomieVisual {
     } else if (sharpness < 0.6666667) {
       this.drawInfo.objectShape = 'Sankaku';
     } else if (sharpness < 0.8333334) {
-      this.drawInfo.objectShape = 'GizaGiza';
+      this.drawInfo.objectShape = 'Shikaku';
     } else {
       this.drawInfo.objectShape = 'Sankaku';
     }
