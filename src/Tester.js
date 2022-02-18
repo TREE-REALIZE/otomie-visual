@@ -1,6 +1,8 @@
-import {OtomieVisual} from './OtomieVisual';
+import { OtomieVisual } from './OtomieVisual';
 
-
-const otimieVisual = new OtomieVisual();
-otimieVisual.init(document.body, 640, 640);
-otimieVisual.render();
+const otomieVisual = new OtomieVisual();
+otomieVisual.setup(document.body, 640, 640);
+otomieVisual.play();
+setInterval(() => {
+  otomieVisual.updateSoundData(otomieVisual.randomSoundData());
+}, 20);
