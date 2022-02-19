@@ -104,8 +104,8 @@ export class GizaGiza {
 
   config() {
     const { screen } = this.app;
-    this.speedMinPerSec = screen.width / 50;
-    this.speedMaxPerSec = screen.width / 4;
+    this.speedMinPerSec = screen.width / (50 / 30);
+    this.speedMaxPerSec = screen.width / (4 / 30);
   }
 
   drawSingle() {

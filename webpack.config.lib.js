@@ -4,11 +4,12 @@ const path = require("path");
 const isProduction = process.env.NODE_ENV == "production";
 
 const config = {
-  entry: './src/OtomieVisual.js',
+  entry: './src/OtomieVisual.ts',
   output: {
     path: path.resolve(__dirname, "lib"),
     filename: 'otomie-visual.js',
-    libraryTarget: 'var',
+    libraryTarget: 'global',
+    libraryExport: 'default',
     library: 'OtomieVisual'
   },
   plugins: [

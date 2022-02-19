@@ -4,17 +4,19 @@ import { GizaGiza } from './GizaGiza';
 import { Nami } from './Nami';
 import { Sankaku } from './Sankaku';
 import { Shikaku } from './Shikaku';
+import { Hoshi } from './Hoshi';
 import { DrawInfo } from './type';
 
 PIXI.utils.skipHello();
 
-export class OtomieVisual {
+export default class OtomieVisual {
   app: PIXI.Application;
   gizaGiza: GizaGiza;
   maru: Maru;
   nami: Nami;
   sankaku: Sankaku;
   shikaku: Shikaku;
+  hoshi: Hoshi;
   elapsedMS = 0.0;
   soundData = {
     volume: 0.0,
@@ -26,7 +28,7 @@ export class OtomieVisual {
     colorMain: 0xdcf567,
     colorSub: 0x566550,
     objectCount: 1,
-    objectShape: 'GizaGiza',
+    objectShape: 'None',
     speed: 0.5,
   };
 
@@ -49,6 +51,8 @@ export class OtomieVisual {
     this.sankaku.setup(app, this.drawInfo);
     this.shikaku = new Shikaku();
     this.shikaku.setup(app, this.drawInfo);
+    this.hoshi = new Hoshi();
+    this.hoshi.setup(app, this.drawInfo);
     this.app.ticker.add(this.draw.bind(this));
     this.app.ticker.stop();
   }
@@ -60,6 +64,7 @@ export class OtomieVisual {
     this.nami.draw();
     this.sankaku.draw();
     this.shikaku.draw();
+    this.hoshi.draw();
   }
 
   play() {
@@ -96,6 +101,9 @@ export class OtomieVisual {
       case 'Shikaku':
         this.shikaku.update(this.drawInfo);
         break;
+      case 'Hoshi':
+        this.hoshi.update(this.drawInfo);
+        break;
       default:
         break;
     }
@@ -127,20 +135,20 @@ export class OtomieVisual {
 
   calcObjectShape() {
     const { sharpness } = this.soundData;
-    // this.drawInfo.objectShape = 'Shikaku';
+    // this.drawInfo.objectShape = 'Hoshi';
     // return;
     if (sharpness < 0.1666667) {
-      this.drawInfo.objectShape = 'GizaGiza';
+      this.drawInfo.objectShape = 'Nami';
     } else if (sharpness < 0.3333334) {
       this.drawInfo.objectShape = 'Maru';
     } else if (sharpness < 0.5) {
-      this.drawInfo.objectShape = 'Nami';
+      this.drawInfo.objectShape = 'Sankaku';
     } else if (sharpness < 0.6666667) {
-      this.drawInfo.objectShape = 'Sankaku';
-    } else if (sharpness < 0.8333334) {
       this.drawInfo.objectShape = 'Shikaku';
+    } else if (sharpness < 0.8333334) {
+      this.drawInfo.objectShape = 'Hoshi';
     } else {
-      this.drawInfo.objectShape = 'Sankaku';
+      this.drawInfo.objectShape = 'GizaGiza';
     }
   }
 

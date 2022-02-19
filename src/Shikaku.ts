@@ -92,8 +92,8 @@ export class Shikaku {
   }
 
   config() {
-    this.speedMinPerSec = 1.0 / 50;
-    this.speedMaxPerSec = 1.0 / 4;
+    this.speedMinPerSec = 1.0 / (50 / 30);
+    this.speedMaxPerSec = 1.0 / (4 / 30);
   }
 
   update(drawInfo: DrawInfo) {

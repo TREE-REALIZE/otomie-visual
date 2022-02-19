@@ -91,8 +91,8 @@ export class Maru {
   }
 
   config() {
-    this.speedMinPerSec = 0.5 / 50;
-    this.speedMaxPerSec = 0.5 / 4;
+    this.speedMinPerSec = 0.5 / (50 / 30);
+    this.speedMaxPerSec = 0.5 / (4 / 30);
   }
 
   update(drawInfo: DrawInfo) {
