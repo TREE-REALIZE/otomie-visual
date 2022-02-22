@@ -5,8 +5,8 @@ export class Maru {
   app: PIXI.Application;
   graphics: PIXI.Graphics;
   renderTexture: PIXI.RenderTexture;
-  innerRadius: number = 50;
-  outerRadius: number = 100;
+  innerRadius: number = 100;
+  outerRadius: number = 200;
   single: PIXI.Sprite;
   double: PIXI.Container;
   triple: PIXI.Container;
@@ -44,7 +44,7 @@ export class Maru {
       const sprite = new PIXI.Sprite(renderTexture);
       sprite.anchor.set(0.5, 0.5);
       sprite.x = screen.width * 0.5;
-      sprite.y = screen.height * 0.5 + Math.sin(Math.PI / 2 + Math.PI * i) * renderTexture.height * 0.8;
+      sprite.y = screen.height * 0.5 + Math.sin(Math.PI / 2 + Math.PI * i) * renderTexture.height * 0.6;
       this.double.addChild(sprite);
     }
     this.double.visible = false;
@@ -57,7 +57,7 @@ export class Maru {
       sprite.x =
         screen.width * 0.5 + Math.cos((-1 * Math.PI) / 2 + ((Math.PI * 2) / 3) * i) * renderTexture.width * 0.8;
       sprite.y =
-        screen.height * 0.5 + Math.sin((-1 * Math.PI) / 2 + ((Math.PI * 2) / 3) * i) * renderTexture.height * 0.8;
+        screen.height * 0.5 + Math.sin((-1 * Math.PI) / 2 + ((Math.PI * 2) / 3) * i) * renderTexture.height * 0.8 + screen.height / 20;
       this.triple.addChild(sprite);
     }
     this.triple.visible = false;

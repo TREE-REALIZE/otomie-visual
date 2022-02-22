@@ -8,7 +8,7 @@ export class Hoshi {
   lenA: number = 100; //星の外接円の半径
   lenB: number = 50; //星の内接円の半径
   lenC: number = 0.6; //小さい星の縮小比率
-  scales: number[];
+  scales = [0.9, 0.55, 0.5, 0.5];
   path: number[] = [];
   path2: number[] = [];
   single: PIXI.Sprite;
@@ -22,22 +22,21 @@ export class Hoshi {
   rotation = 0;
 
   setup(app: PIXI.Application, drawInfo: DrawInfo) {
-    const { lenA, lenB, lenC } = this;
+    const { lenA, lenB, lenC, scales } = this;
     this.app = app;
     const graphics = new PIXI.Graphics();
     this.graphics = graphics;
     const screen = this.app.screen;
     this.config();
-    const scales = [0.9, 0.2, 0.17, 0.17].map(each => screen.width / (lenA * 2) * each);
-    this.scales = scales;
+    const scale = screen.width / (lenA * 2);
     for (let i = 0; i < 5; i++) {
       const outerPos = [
-        Math.cos(-Math.PI / 2 + (Math.PI * 2 / 5) * i) * lenA * scales[0],
-        Math.sin(-Math.PI / 2 + (Math.PI * 2 / 5) * i) * lenA * scales[0]
+        Math.cos(-Math.PI / 2 + (Math.PI * 2 / 5) * i) * lenA * scale,
+        Math.sin(-Math.PI / 2 + (Math.PI * 2 / 5) * i) * lenA * scale
       ];
       const innerPos = [
-        Math.cos(-Math.PI / 2 + Math.PI / 5 + (Math.PI * 2 / 5) * i) * lenB * scales[0],
-        Math.sin(-Math.PI / 2 + Math.PI / 5 + (Math.PI * 2 / 5) * i) * lenB * scales[0]
+        Math.cos(-Math.PI / 2 + Math.PI / 5 + (Math.PI * 2 / 5) * i) * lenB * scale,
+        Math.sin(-Math.PI / 2 + Math.PI / 5 + (Math.PI * 2 / 5) * i) * lenB * scale
       ];
       this.path.push(outerPos[0]);
       this.path.push(outerPos[1]);
@@ -49,8 +48,8 @@ export class Hoshi {
       this.path2.push(innerPos[1] * lenC);
     }
     const renderTexture = PIXI.RenderTexture.create({
-      width: lenA * 2 * scales[0],
-      height: lenA * 2 * scales[0],
+      width: lenA * 2 * scale,
+      height: lenA * 2 * scale,
       resolution: devicePixelRatio,
     });
     this.renderTexture = renderTexture;
@@ -58,18 +57,20 @@ export class Hoshi {
 
     this.single = new PIXI.Sprite(renderTexture);
     this.single.anchor.set(0.5, 0.5);
+    this.single.scale.set(scales[0]);
     this.single.x = screen.width / 2;
     this.single.y = screen.height / 2;
     this.single.visible = false;
     this.app.stage.addChild(this.single);
 
     this.double = new PIXI.Container();
+    let radius = Math.sqrt(screen.width * screen.width + screen.height + screen.height) / 4 + screen.width / 30;
     for (let i = 0; i < 2; i++) {
       const sprite = new PIXI.Sprite(renderTexture);
       sprite.anchor.set(0.5, 0.5);
       sprite.scale.set(scales[1]);
-      sprite.x = Math.cos(-Math.PI / 4 + Math.PI * i) * (lenA * 2) * scales[1] * 1.4;
-      sprite.y = Math.sin(-Math.PI / 4 + Math.PI * i) * (lenA * 2) * scales[1] * 1.4;
+      sprite.x = Math.cos(-Math.PI / 4 + Math.PI * i) * radius;
+      sprite.y = Math.sin(-Math.PI / 4 + Math.PI * i) * radius;
       this.double.addChild(sprite);
     }
     this.double.x = screen.width / 2;
@@ -82,8 +83,8 @@ export class Hoshi {
       const sprite = new PIXI.Sprite(renderTexture);
       sprite.anchor.set(0.5, 0.5);
       sprite.scale.set(scales[2]);
-      sprite.x = Math.cos(-Math.PI / 2 + Math.PI * 2 / 3 * i) * (lenA * 2) * scales[2] * 1.6;
-      sprite.y = Math.sin(-Math.PI / 2 + Math.PI * 2 / 3 * i) * (lenA * 2) * scales[2] * 1.6 + screen.height * 0.075;
+      sprite.x = Math.cos(-Math.PI / 2 + Math.PI * 2 / 3 * i) * radius;
+      sprite.y = Math.sin(-Math.PI / 2 + Math.PI * 2 / 3 * i) * radius + screen.height / 20;
       this.triple.addChild(sprite);
     }
     this.triple.x = screen.width / 2;
@@ -96,8 +97,8 @@ export class Hoshi {
       const sprite = new PIXI.Sprite(renderTexture);
       sprite.anchor.set(0.5, 0.5);
       sprite.scale.set(scales[3]);
-      sprite.x = Math.cos(-Math.PI / 4 + Math.PI * 2 / 4 * i) * (lenA * 2) * scales[3] * 1.9;
-      sprite.y = Math.sin(-Math.PI / 4 + Math.PI * 2 / 4 * i) * (lenA * 2) * scales[3] * 1.9;
+      sprite.x = Math.cos(-Math.PI / 4 + Math.PI * 2 / 4 * i) * radius * 1.2;
+      sprite.y = Math.sin(-Math.PI / 4 + Math.PI * 2 / 4 * i) * radius * 1.2;
       this.four.addChild(sprite);
     }
     this.four.x = screen.width / 2;

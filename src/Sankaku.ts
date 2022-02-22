@@ -5,10 +5,11 @@ export class Sankaku {
   app: PIXI.Application;
   graphics: PIXI.Graphics;
   renderTexture: PIXI.RenderTexture;
-  lenA: number = 220 * 1.5;  // 底辺
-  lenB: number = 180 * 1.5  // 高さ;
-  lenC: number = 110 * 1.5  // 小さい三角形の高さ;
-  scales = [1, 0.75, 0.7, 0.6]
+  unitWidth = 220;
+  lenA: number;  // 底辺
+  lenB: number;  // 高さ;
+  lenC: number;  // 小さい三角形の高さ;
+  scales = [0.75, 0.5, 0.4, 0.4]
   single: PIXI.Sprite;
   double: PIXI.Container;
   triple: PIXI.Container;
@@ -21,11 +22,19 @@ export class Sankaku {
   moveDirection: number = 1;
 
   setup(app: PIXI.Application, drawInfo: DrawInfo) {
-    const { lenA, lenB, lenC, scales } = this;
+    const { unitWidth, scales } = this;
     this.app = app;
     const graphics = new PIXI.Graphics();
     this.graphics = graphics;
     this.config();
+    const screen = this.app.screen;
+    const scale = screen.width / unitWidth;
+    const lenA = unitWidth * scale;
+    const lenB = 180 * scale;
+    const lenC = 110 * scale;
+    this.lenA = lenA;
+    this.lenB = lenB;
+    this.lenC = lenC;
     const renderTexture = PIXI.RenderTexture.create({
       width: lenA,
       height: lenB,
@@ -33,9 +42,9 @@ export class Sankaku {
     });
     this.renderTexture = renderTexture;
     this.update(drawInfo);
-    const screen = this.app.screen;
     this.single = new PIXI.Sprite(renderTexture);
     this.single.anchor.set(0.5, 0);
+    this.single.scale.set(scales[0]);
     this.single.x = screen.width * 0.5;
     this.single.y = 0;
     this.single.visible = false;
@@ -63,7 +72,7 @@ export class Sankaku {
       this.triple.addChild(sprite);
     }
     this.triple.x = screen.width * 0.5;
-    this.triple.y = screen.height * 0.5;
+    this.triple.y = screen.height * 0.5 + screen.height / 20;
     this.triple.visible = false;
     this.app.stage.addChild(this.triple);
 
@@ -126,8 +135,8 @@ export class Sankaku {
       return;
     }
 
-    // this.drawFour();
-    // return;
+    this.drawFour();
+    return;
 
     switch (objectCount) {
       case 1:
@@ -176,8 +185,8 @@ export class Sankaku {
     this.four.visible = false;
     const radius = lenA * scales[2] * 0.5 / Math.sqrt(3);
     this.triple.children.map((each, i) => {
-      each.x = (radius + (app.screen.height / 2 - radius - lenB * scales[2]) * moveRate) * Math.cos(-0.5 * Math.PI + Math.PI * 2 / 3 * i);
-      each.y = (radius + (app.screen.height / 2 - radius - lenB * scales[2]) * moveRate) * Math.sin(-0.5 * Math.PI + Math.PI * 2 / 3 * i);
+      each.x = (radius + ((app.screen.height / 2 + app.screen.height / 20) - radius - lenB * scales[2]) * moveRate) * Math.cos(-0.5 * Math.PI + Math.PI * 2 / 3 * i);
+      each.y = (radius + ((app.screen.height / 2 + app.screen.height / 20) - radius - lenB * scales[2]) * moveRate) * Math.sin(-0.5 * Math.PI + Math.PI * 2 / 3 * i);
     })
   }
 
@@ -189,8 +198,8 @@ export class Sankaku {
     this.four.visible = true;
     const radius = app.screen.height / 2;
     this.four.children.map((each, i) => {
-      each.x = (radius + (app.screen.height / 2 - radius - lenB * scales[3]) * moveRate) * Math.cos(0.5 * Math.PI + Math.PI / 2 * i);
-      each.y = (radius + (app.screen.height / 2 - radius - lenB * scales[3]) * moveRate) * Math.sin(0.5 * Math.PI + Math.PI / 2 * i);
+      each.x = (radius + (-1 * radius + lenB * scales[3]) * moveRate) * Math.cos(0.5 * Math.PI + Math.PI / 2 * i);
+      each.y = (radius + (-1 * radius + lenB * scales[3]) * moveRate) * Math.sin(0.5 * Math.PI + Math.PI / 2 * i);
     })
   }
 }

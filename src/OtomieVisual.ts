@@ -19,10 +19,12 @@ export default class OtomieVisual {
   hoshi: Hoshi;
   elapsedMS = 0.0;
   soundData = {
-    volume: 0.0,
-    pitch: 0.0,
-    sharpness: 0.0,
-    roughness: 0.0,
+    hue: 0,
+    saturation: 0,
+    brightness: 0,
+    objectCount: 0.,
+    objectShape: 0,
+    speed: 0
   };
   drawInfo: DrawInfo = {
     colorMain: 0xdcf567,
@@ -109,43 +111,43 @@ export default class OtomieVisual {
     }
   }
 
-  randomSoundData() {
+  randomSoundData(): OtomieVisual['soundData'] {
     return {
-      volume: Math.abs(Math.cos((this.elapsedMS / 1000) * 0.2)),
-      pitch: Math.abs(Math.sin((this.elapsedMS / 1000) * 1 + 1)),
-      sharpness: Math.abs(Math.sin((this.elapsedMS / 1000) * 0.1)),
-      roughness: Math.abs(Math.sin((this.elapsedMS / 1000) * 1)),
+      hue: Math.abs(Math.cos((this.elapsedMS / 1000) * 0.2)),
+      saturation: Math.abs(Math.sin((this.elapsedMS / 1000) * 1 + 1)),
+      brightness: Math.abs(Math.sin((this.elapsedMS / 1000) * 0.1)),
+      objectCount: Math.abs(Math.sin((this.elapsedMS / 1000) * 0.3)),
+      objectShape: Math.abs(Math.sin((this.elapsedMS / 1000) * 0.4)),
+      speed: Math.abs(Math.sin((this.elapsedMS / 1000) * 0.5)),
     };
   }
 
   calcHsv() {
-    const { sharpness, volume, pitch } = this.soundData;
-    const hue = 360 * (Math.abs(sharpness - 0.5) * 2);
-    let rgb = this.hsvToRgb(hue, volume, pitch);
+    const { hue, saturation, brightness } = this.soundData;
+    let rgb = this.hsvToRgb(hue * 360, saturation, brightness);
     this.drawInfo.colorMain = PIXI.utils.rgb2hex(rgb);
-    rgb = this.hsvToRgb(hue, volume, pitch * 0.7);
+    rgb = this.hsvToRgb(hue * 360, saturation, brightness * 0.7);
     this.drawInfo.colorSub = PIXI.utils.rgb2hex(rgb);
   }
 
   calcObjectCount() {
-    const { pitch, volume } = this.soundData;
-    const rate = (pitch + -1 * volume + 1) * 0.5;
-    this.drawInfo.objectCount = Math.min(Math.floor(rate / 0.25) + 1, 4);
+    const { objectCount } = this.soundData;
+    this.drawInfo.objectCount = Math.min(Math.floor(objectCount / 0.25) + 1, 4);
   }
 
   calcObjectShape() {
-    const { sharpness } = this.soundData;
-    // this.drawInfo.objectShape = 'Hoshi';
+    const { objectShape } = this.soundData;
+    // this.drawInfo.objectShape = 'GizaGiza';
     // return;
-    if (sharpness < 0.1666667) {
+    if (objectShape < 0.1666667) {
       this.drawInfo.objectShape = 'Nami';
-    } else if (sharpness < 0.3333334) {
+    } else if (objectShape < 0.3333334) {
       this.drawInfo.objectShape = 'Maru';
-    } else if (sharpness < 0.5) {
+    } else if (objectShape < 0.5) {
       this.drawInfo.objectShape = 'Sankaku';
-    } else if (sharpness < 0.6666667) {
+    } else if (objectShape < 0.6666667) {
       this.drawInfo.objectShape = 'Shikaku';
-    } else if (sharpness < 0.8333334) {
+    } else if (objectShape < 0.8333334) {
       this.drawInfo.objectShape = 'Hoshi';
     } else {
       this.drawInfo.objectShape = 'GizaGiza';
@@ -153,8 +155,8 @@ export default class OtomieVisual {
   }
 
   calcSpeed() {
-    const { pitch } = this.soundData;
-    this.drawInfo.speed = pitch;
+    const { speed } = this.soundData;
+    this.drawInfo.speed = speed;
   }
 
   hsvToRgb(h: number, s: number, v: number) {
