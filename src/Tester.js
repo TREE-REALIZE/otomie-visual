@@ -6,3 +6,10 @@ otomieVisual.play();
 setInterval(() => {
   otomieVisual.updateSoundData(otomieVisual.randomSoundData());
 }, 2000);
+
+// setTimeout(() => {
+//   const image = otomieVisual.takeScreenShot(otomieVisual.randomSoundData())
+//   const img = new Image();
+//   img.src = image;
+//   document.body.appendChild(img);
+// }, 5000)

@@ -159,6 +159,19 @@ export default class OtomieVisual {
     this.drawInfo.speed = speed;
   }
 
+  takeScreenShot(soundData: OtomieVisual['soundData']) {
+    const started = this.app.ticker.started;
+    this.app.ticker.stop();
+    this.updateSoundData(soundData);
+    this.draw();
+    this.app.render();
+    const image = this.app.view.toDataURL();
+    if (started) {
+      this.app.ticker.start();
+    }
+    return image;
+  }
+
   hsvToRgb(h: number, s: number, v: number) {
     const hlimit = 360;
     const slimit = 1;
