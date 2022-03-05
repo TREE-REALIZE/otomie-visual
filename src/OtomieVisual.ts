@@ -28,11 +28,14 @@ export default class OtomieVisual {
   };
   drawInfo: DrawInfo = {
     colorMain: 0xdcf567,
+    colorMainRgb: [220.0 / 255, 245.0 / 255, 103.0 / 255],
     colorSub: 0x566550,
+    colorSubRgb: [86.0 / 255, 101.0 / 255, 80.0 / 255],
     objectCount: 1,
     objectShape: 'None',
     speed: 0.5,
   };
+  updateFn: () => void = null;
 
   setup(container: HTMLDivElement, width: number, height: number) {
     const app = new PIXI.Application({
@@ -61,6 +64,10 @@ export default class OtomieVisual {
 
   draw() {
     this.elapsedMS += this.app.ticker.deltaMS;
+    if (this.updateFn) {
+      this.updateFn();
+      this.updateFn = null;
+    }
     this.gizaGiza.draw();
     this.maru.draw();
     this.nami.draw();
@@ -81,12 +88,7 @@ export default class OtomieVisual {
     this.app.ticker.stop();
   }
 
-  updateSoundData(soundData: OtomieVisual['soundData']) {
-    this.soundData = soundData;
-    this.calcHsv();
-    this.calcObjectCount();
-    this.calcObjectShape();
-    this.calcSpeed();
+  updateDrawInfo() {
     switch (this.drawInfo.objectShape) {
       case 'GizaGiza':
         this.gizaGiza.update(this.drawInfo);
@@ -111,6 +113,15 @@ export default class OtomieVisual {
     }
   }
 
+  updateSoundData(soundData: OtomieVisual['soundData']) {
+    this.soundData = soundData;
+    this.calcHsv();
+    this.calcObjectCount();
+    this.calcObjectShape();
+    this.calcSpeed();
+    this.updateFn = this.updateDrawInfo;
+  }
+
   randomSoundData(): OtomieVisual['soundData'] {
     return {
       hue: Math.abs(Math.cos((this.elapsedMS / 1000) * 0.2)),
@@ -124,10 +135,10 @@ export default class OtomieVisual {
 
   calcHsv() {
     const { hue, saturation, brightness } = this.soundData;
-    let rgb = this.hsvToRgb(hue * 360, saturation, brightness);
-    this.drawInfo.colorMain = PIXI.utils.rgb2hex(rgb);
-    rgb = this.hsvToRgb(hue * 360, saturation, brightness * 0.7);
-    this.drawInfo.colorSub = PIXI.utils.rgb2hex(rgb);
+    this.drawInfo.colorMainRgb = this.hsvToRgb(hue * 360, saturation, brightness);
+    this.drawInfo.colorMain = PIXI.utils.rgb2hex(this.drawInfo.colorMainRgb);
+    this.drawInfo.colorSubRgb = this.hsvToRgb(hue * 360, saturation, brightness * 0.7);
+    this.drawInfo.colorSub = PIXI.utils.rgb2hex(this.drawInfo.colorSubRgb);
   }
 
   calcObjectCount() {
@@ -137,7 +148,8 @@ export default class OtomieVisual {
 
   calcObjectShape() {
     const { objectShape } = this.soundData;
-    // this.drawInfo.objectShape = 'GizaGiza';
+    // const objectShape = Math.abs(Math.sin((this.elapsedMS / 1000) * 0.4));
+    // this.drawInfo.objectShape = 'Nami';
     // return;
     if (objectShape < 0.1666667) {
       this.drawInfo.objectShape = 'Nami';

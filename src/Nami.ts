@@ -1,9 +1,12 @@
 import * as PIXI from 'pixi.js';
 import { DrawInfo } from './type';
+import { getColorShader } from './shader/ColorShader'
 
 export class Nami {
   app: PIXI.Application;
   graphics: PIXI.Graphics;
+  thick: PIXI.Graphics;
+  thin: PIXI.Graphics;
   renderTexture: PIXI.RenderTexture;
   lenA: number;
   lenB: number;
@@ -23,8 +26,7 @@ export class Nami {
 
   setup(app: PIXI.Application, drawInfo: DrawInfo) {
     this.app = app;
-    const graphics = new PIXI.Graphics();
-    this.graphics = graphics;
+    this.drawInfo = drawInfo;
     const screen = this.app.screen;
     this.config();
     const unitWidth = 100;
@@ -54,22 +56,80 @@ export class Nami {
       resolution: devicePixelRatio,
     });
     this.renderTexture = renderTexture;
+    this.setupGraphics();
     this.update(drawInfo);
+    this.setupSplites();
+  }
 
+  setupGraphics() {
+    const { path, lenA, lenC, lenD } = this;
+    const { colorMain, colorSub } = this.drawInfo;
+    this.graphics = new PIXI.Graphics();
+    const thick = new PIXI.Graphics();
+    this.thick = thick;
+    const thin = new PIXI.Graphics();
+    this.thin = thin;
+    this.graphics.addChild(thick, thin)
+    thick.shader = getColorShader();
+    thick.x = lenA * -0.5;
+    thick.lineStyle(lenC, colorSub);
+    thick.moveTo(path[0][0], path[0][1]);
+    thick.bezierCurveTo(
+      path[1][0], path[1][1],
+      path[2][0], path[2][1],
+      path[3][0], path[3][1],
+    );
+    thick.lineTo(path[4][0], path[4][1]);
+    thick.bezierCurveTo(
+      path[5][0], path[5][1],
+      path[6][0], path[6][1],
+      path[7][0], path[7][1],
+    );
+    thick.lineTo(path[7][0], path[7][1]);
+    thick.bezierCurveTo(
+      path[1][0] + path[7][0], path[1][1],
+      path[2][0] + path[7][0], path[2][1],
+      path[3][0] + path[7][0], path[3][1],
+    );
+    thin.shader = getColorShader();
+    thin.x = lenA * -0.5;
+    thin.lineStyle(lenD, colorMain);
+    thin.moveTo(path[0][0], path[0][1]);
+    thin.bezierCurveTo(
+      path[1][0], path[1][1],
+      path[2][0], path[2][1],
+      path[3][0], path[3][1],
+    );
+    thin.lineTo(path[4][0], path[4][1]);
+    thin.bezierCurveTo(
+      path[5][0], path[5][1],
+      path[6][0], path[6][1],
+      path[7][0], path[7][1],
+    );
+    thin.lineTo(path[7][0], path[7][1]);
+    thin.bezierCurveTo(
+      path[1][0] + path[7][0], path[1][1],
+      path[2][0] + path[7][0], path[2][1],
+      path[3][0] + path[7][0], path[3][1],
+    );
+  }
+
+  setupSplites() {
+    const { renderTexture, app } = this;
+    const { screen } = app;
     this.single = new PIXI.TilingSprite(
       renderTexture,
-      renderTexture.width * Math.ceil(screen.width / renderTexture.width),
+      screen.width,
       renderTexture.height,
     );
     this.single.y = (screen.height - renderTexture.height) * 0.5;
     this.single.visible = false;
     this.app.stage.addChild(this.single);
-
     this.double = new PIXI.Container();
     for (let i = 0; i < 2; i++) {
       const wave = new PIXI.TilingSprite(
         renderTexture,
-        renderTexture.width * Math.ceil(screen.width / renderTexture.width),
+        screen.width,
         renderTexture.height,
       );
       wave.y = screen.height * 0.25 + screen.height * 0.5 * i - renderTexture.height * 0.5;
@@ -82,7 +142,7 @@ export class Nami {
     for (let i = 0; i < 3; i++) {
       const wave = new PIXI.TilingSprite(
         renderTexture,
-        renderTexture.width * Math.ceil(screen.width / renderTexture.width),
+        screen.width,
         renderTexture.height,
       );
       wave.y = screen.height * 0.1666 + screen.height * 0.333 * i - renderTexture.height * 0.5;
@@ -95,7 +155,7 @@ export class Nami {
     for (let i = 0; i < 4; i++) {
       const wave = new PIXI.TilingSprite(
         renderTexture,
-        renderTexture.width * Math.ceil(screen.width / renderTexture.width),
+        screen.width,
         renderTexture.height,
       );
       wave.y = screen.height * 0.125 + screen.height * 0.25 * i - renderTexture.height * 0.5;
@@ -111,52 +171,24 @@ export class Nami {
     this.speedMaxPerSec = screen.width / (4 / 30);
   }
 
+  render() {
+    const { app, graphics, thick, thin, renderTexture, drawInfo } = this;
+    const { colorMainRgb, colorSubRgb } = drawInfo;
+    thick.shader.uniforms.uColor[0] = colorSubRgb[0];
+    thick.shader.uniforms.uColor[1] = colorSubRgb[1];
+    thick.shader.uniforms.uColor[2] = colorSubRgb[2];
+    thin.shader.uniforms.uColor[0] = colorMainRgb[0];
+    thin.shader.uniforms.uColor[1] = colorMainRgb[1];
+    thin.shader.uniforms.uColor[2] = colorMainRgb[2];
+    app.renderer.render(graphics, { renderTexture, clear: true });
+  }
+
   update(drawInfo: DrawInfo) {
-    const { graphics, path, app, renderTexture, speedMaxPerSec, speedMinPerSec, lenA, lenC, lenD } = this;
-    const { colorMain, colorSub, speed } = drawInfo;
+    const { speedMaxPerSec, speedMinPerSec } = this;
+    const { speed } = drawInfo;
     this.drawInfo = drawInfo;
     this.currentSpeedPerSec = speedMinPerSec + (speedMaxPerSec - speedMinPerSec) * speed;
-    graphics.x = lenA * -0.5;
-    graphics.lineStyle(lenC, colorSub);
-    graphics.moveTo(path[0][0], path[0][1]);
-    graphics.bezierCurveTo(
-      path[1][0], path[1][1],
-      path[2][0], path[2][1],
-      path[3][0], path[3][1],
-    );
-    graphics.lineTo(path[4][0], path[4][1]);
-    graphics.bezierCurveTo(
-      path[5][0], path[5][1],
-      path[6][0], path[6][1],
-      path[7][0], path[7][1],
-    );
-    graphics.lineTo(path[7][0], path[7][1]);
-    graphics.bezierCurveTo(
-      path[1][0] + path[7][0], path[1][1],
-      path[2][0] + path[7][0], path[2][1],
-      path[3][0] + path[7][0], path[3][1],
-    );
-    graphics.lineStyle(lenD, colorMain);
-    graphics.moveTo(path[0][0], path[0][1]);
-    graphics.bezierCurveTo(
-      path[1][0], path[1][1],
-      path[2][0], path[2][1],
-      path[3][0], path[3][1],
-    );
-    graphics.lineTo(path[4][0], path[4][1]);
-    graphics.bezierCurveTo(
-      path[5][0], path[5][1],
-      path[6][0], path[6][1],
-      path[7][0], path[7][1],
-    );
-    graphics.lineTo(path[7][0], path[7][1]);
-    graphics.bezierCurveTo(
-      path[1][0] + path[7][0], path[1][1],
-      path[2][0] + path[7][0], path[2][1],
-      path[3][0] + path[7][0], path[3][1],
-    );
-
-    app.renderer.render(graphics, { renderTexture, clear: true });
+    this.render();
   }
 
   draw() {

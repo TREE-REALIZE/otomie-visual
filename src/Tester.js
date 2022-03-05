@@ -5,7 +5,7 @@ otomieVisual.setup(document.getElementById('app'), 1024, 1024);
 otomieVisual.play();
 setInterval(() => {
   otomieVisual.updateSoundData(otomieVisual.randomSoundData());
-}, 2000);
+}, 20);
 
 // setTimeout(() => {
 //   const image = otomieVisual.takeScreenShot(otomieVisual.randomSoundData())

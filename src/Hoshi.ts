@@ -132,8 +132,6 @@ export class Hoshi {
 
   draw() {
     this.rotation += this.app.ticker.deltaMS * 0.001 * this.currentSpeedPerSec;
-    // this.drawFour();
-    // return;
 
     const { objectCount, objectShape } = this.drawInfo;
     if (objectShape !== 'Hoshi') {

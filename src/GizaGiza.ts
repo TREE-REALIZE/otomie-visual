@@ -55,7 +55,7 @@ export class GizaGiza {
 
     this.single = new PIXI.TilingSprite(
       renderTexture,
-      renderTexture.width * Math.ceil(screen.width / renderTexture.width),
+      screen.width,
       renderTexture.height,
     );
     this.single.y = (screen.height - renderTexture.height) * 0.5;
@@ -66,7 +66,7 @@ export class GizaGiza {
     for (let i = 0; i < 2; i++) {
       const wave = new PIXI.TilingSprite(
         renderTexture,
-        renderTexture.width * Math.ceil(screen.width / renderTexture.width),
+        screen.width,
         renderTexture.height,
       );
       wave.y = screen.height * 0.25 + screen.height * 0.5 * i - renderTexture.height * 0.5;
@@ -79,7 +79,7 @@ export class GizaGiza {
     for (let i = 0; i < 3; i++) {
       const wave = new PIXI.TilingSprite(
         renderTexture,
-        renderTexture.width * Math.ceil(screen.width / renderTexture.width),
+        screen.width,
         renderTexture.height,
       );
       wave.y = screen.height * 0.1666 + screen.height * 0.333 * i - renderTexture.height * 0.5;
@@ -92,7 +92,7 @@ export class GizaGiza {
     for (let i = 0; i < 4; i++) {
       const wave = new PIXI.TilingSprite(
         renderTexture,
-        renderTexture.width * Math.ceil(screen.width / renderTexture.width),
+        screen.width,
         renderTexture.height,
       );
       wave.y = screen.height * 0.125 + screen.height * 0.25 * i - renderTexture.height * 0.5;
