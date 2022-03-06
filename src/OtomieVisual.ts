@@ -149,7 +149,7 @@ export default class OtomieVisual {
   calcObjectShape() {
     const { objectShape } = this.soundData;
     // const objectShape = Math.abs(Math.sin((this.elapsedMS / 1000) * 0.4));
-    // this.drawInfo.objectShape = 'Nami';
+    // this.drawInfo.objectShape = 'Sankaku';
     // return;
     if (objectShape < 0.1666667) {
       this.drawInfo.objectShape = 'Nami';

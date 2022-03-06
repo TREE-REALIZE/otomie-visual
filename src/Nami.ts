@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js';
 import { DrawInfo } from './type';
-import { getColorShader } from './shader/ColorShader'
+import { vertexSrc, fragmentSrc } from './shader/ColorShader'
 
 export class Nami {
   app: PIXI.Application;
@@ -70,7 +70,11 @@ export class Nami {
     const thin = new PIXI.Graphics();
     this.thin = thin;
     this.graphics.addChild(thick, thin)
-    thick.shader = getColorShader();
+    thick.shader = PIXI.Shader.from(vertexSrc, fragmentSrc, {
+      uColor: new Float32Array([1, 1, 1, 1]),
+      tint: new Float32Array([1, 1, 1, 1])
+    }
+    );
     thick.x = lenA * -0.5;
     thick.lineStyle(lenC, colorSub);
     thick.moveTo(path[0][0], path[0][1]);
@@ -91,7 +95,11 @@ export class Nami {
       path[2][0] + path[7][0], path[2][1],
       path[3][0] + path[7][0], path[3][1],
     );
-    thin.shader = getColorShader();
+    thin.shader = PIXI.Shader.from(vertexSrc, fragmentSrc, {
+      uColor: new Float32Array([1, 1, 1, 1]),
+      tint: new Float32Array([1, 1, 1, 1])
+    }
+    );
     thin.x = lenA * -0.5;
     thin.lineStyle(lenD, colorMain);
     thin.moveTo(path[0][0], path[0][1]);

@@ -1,9 +1,12 @@
 import * as PIXI from 'pixi.js';
 import { DrawInfo } from './type';
+import { vertexSrc, fragmentSrc } from './shader/ColorShader'
 
 export class Sankaku {
   app: PIXI.Application;
   graphics: PIXI.Graphics;
+  thick: PIXI.Mesh<PIXI.Shader>;
+  thin: PIXI.Mesh<PIXI.Shader>;
   renderTexture: PIXI.RenderTexture;
   unitWidth = 220;
   lenA: number;  // 底辺
@@ -24,8 +27,7 @@ export class Sankaku {
   setup(app: PIXI.Application, drawInfo: DrawInfo) {
     const { unitWidth, scales } = this;
     this.app = app;
-    const graphics = new PIXI.Graphics();
-    this.graphics = graphics;
+    this.drawInfo = drawInfo;
     this.config();
     const screen = this.app.screen;
     const scale = screen.width / unitWidth;
@@ -41,7 +43,35 @@ export class Sankaku {
       resolution: devicePixelRatio,
     });
     this.renderTexture = renderTexture;
+    this.setupGraphics();
     this.update(drawInfo);
+    this.setupSplites();
+  }
+
+  setupGraphics() {
+    const { lenA, lenB, lenC } = this;
+    const { colorMain, colorSub } = this.drawInfo;
+    const graphics = new PIXI.Graphics();
+    this.graphics = graphics;
+    const rate = lenC / lenB;
+    const thick = new PIXI.Mesh(new PIXI.Geometry()
+      .addAttribute('aVertexPosition', [0, 0, lenA, 0, lenA * 0.5, lenB]), PIXI.Shader.from(vertexSrc, fragmentSrc, {
+        uColor: new Float32Array([1, 1, 1, 1]),
+      }
+      ));
+    this.thick = thick;
+    const thin = new PIXI.Mesh(new PIXI.Geometry()
+      .addAttribute('aVertexPosition', [lenA * (1 - rate) * 0.5, lenB - lenC, lenA - lenA * (1 - rate) * 0.5, lenB - lenC, lenA * 0.5, lenB]), PIXI.Shader.from(vertexSrc, fragmentSrc, {
+        uColor: new Float32Array([1, 1, 1, 1]),
+      }
+      ));
+    this.thin = thin;
+    this.graphics.addChild(thick, thin)
+  }
+
+  setupSplites() {
+    const { renderTexture, scales, app } = this;
+    const { screen } = app;
     this.single = new PIXI.Sprite(renderTexture);
     this.single.anchor.set(0.5, 0);
     this.single.scale.set(scales[0]);
@@ -91,17 +121,14 @@ export class Sankaku {
   }
 
   render() {
-    const { graphics, lenA, lenB, lenC, app, renderTexture } = this;
-    const { colorMain, colorSub } = this.drawInfo;
-    const rate = lenC / lenB;
-    graphics.lineStyle(0);
-    graphics.beginFill(colorSub);
-    graphics.drawPolygon([0, 0, lenA, 0, lenA * 0.5, lenB]);
-    graphics.endFill();
-    graphics.lineStyle(0);
-    graphics.beginFill(colorMain);
-    graphics.drawPolygon([lenA * (1 - rate) * 0.5, lenB - lenC, lenA - lenA * (1 - rate) * 0.5, lenB - lenC, lenA * 0.5, lenB]);
-    graphics.endFill();
+    const { app, graphics, thick, thin, renderTexture, drawInfo } = this;
+    const { colorMainRgb, colorSubRgb } = drawInfo;
+    thick.shader.uniforms.uColor[0] = colorSubRgb[0];
+    thick.shader.uniforms.uColor[1] = colorSubRgb[1];
+    thick.shader.uniforms.uColor[2] = colorSubRgb[2];
+    thin.shader.uniforms.uColor[0] = colorMainRgb[0];
+    thin.shader.uniforms.uColor[1] = colorMainRgb[1];
+    thin.shader.uniforms.uColor[2] = colorMainRgb[2];
     app.renderer.render(graphics, { renderTexture, clear: true });
   }
 
@@ -135,8 +162,8 @@ export class Sankaku {
       return;
     }
 
-    this.drawFour();
-    return;
+    // this.drawSingle();
+    // return;
 
     switch (objectCount) {
       case 1:
